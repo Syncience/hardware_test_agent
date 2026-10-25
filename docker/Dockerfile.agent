@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+
+WORKDIR /workspace
+
+COPY pyproject.toml README.md AGENTS.md SHIFT_NOTES.md /workspace/
+COPY skills /workspace/skills
+COPY src /workspace/src
+
+RUN pip install --no-cache-dir -e .
+
+CMD ["python", "-m", "src.harness.graph_loop", "--profile", "rtx2080_8gb"]

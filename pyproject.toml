@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hardware-test-agent"
+version = "0.1.0"
+description = "Confidential Local AI Agent & Multi-GPU HPC Harness for Hardware Testing (RTX 2080 / RTX 3060 + 64GB RAM)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Syncience" }
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Syncience/hardware_test_agent"
+Repository = "https://github.com/Syncience/hardware_test_agent"
+Bookshelf = "https://github.com/Syncience/ohm-bookshelf"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

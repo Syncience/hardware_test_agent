@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ohm-bookshelf": {
+      "command": "python",
+      "args": ["-m", "src.plugins.mcp_server"],
+      "cwd": "../"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.DS_Store
+# Confidential Standard #023: Never commit raw teststation logs or local model weights
+docker/ram_log_handles/
+docker/models_cache/
+docker/artifacts_sanitized/

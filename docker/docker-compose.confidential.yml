@@ -1,0 +1,59 @@
+version: "3.9"
+
+# ============================================================================
+# Syncience/hardware_test_agent — Air-Gapped Confidential Container Stack
+# Supports:
+#   - rtx2080_8gb            (Dev PC: 8GB VRAM + 64GB RAM)
+#   - rtx3060_12gb           (Confidential Teststation: 12GB VRAM + 64GB RAM)
+#   - dual_rtx3060_24gb      (Same-PC Dual 3060: 24GB Pooled VRAM + 64GB RAM)
+#   - hpc_asymmetric_cluster (PC1 RTX 2080 Jev + PC2 RTX 3060 Solver)
+# ============================================================================
+
+services:
+  local-jev-and-solver:
+    image: ollama/ollama:latest
+    container_name: hw-agent-local-llm
+    restart: unless-stopped
+    networks:
+      - airgap_hw_net
+    shm_size: "16gb" # Uses 64GB System RAM for fast tensor & KV-cache buffers
+    environment:
+      - OLLAMA_NUM_PARALLEL=4
+      - OLLAMA_MAX_LOADED_MODELS=2
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=q8_0 # Protects 8GB/12GB VRAM from long-trace OOM (#098)
+    volumes:
+      - ./models_cache:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 32G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  hardware-test-harness:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+    container_name: hw-test-harness
+    depends_on:
+      - local-jev-and-solver
+    networks:
+      - airgap_hw_net
+    shm_size: "16gb" # 16GB RAM disk for NVIDIA/MIT #021 raw teststation log handles
+    environment:
+      - JEV_LOCAL_URL=http://local-jev-and-solver:11434/api/generate
+      - GPU_PROFILE=${GPU_PROFILE:-rtx2080_8gb}
+      - CONFIDENTIAL_MODE=strict
+    volumes:
+      - ../skills:/workspace/skills
+      - ./ram_log_handles:/workspace/docker/ram_log_handles
+      - ./artifacts_sanitized:/workspace/docker/artifacts_sanitized
+
+networks:
+  airgap_hw_net:
+    driver: bridge
+    internal: true # Standard #023: Physically blocks all external internet egress
